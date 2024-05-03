@@ -1,0 +1,203 @@
+plugins:
+  ################ DNS #################
+  # google doh dot h3
+  - tag: google
+    type: forward
+    args:
+      concurrent: 3
+      upstreams:
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::6464"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::0064"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8844"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8888"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.4.4"
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.8.8"
+
+        - addr: "tls://dns.google"
+          dial_addr: "8.8.4.4"
+          enable_pipeline: true # TCP/DoT 启用 RFC 7766 新的 query pipelining 连接复用模式
+        - addr: "tls://dns.google"
+          dial_addr: "2001:4860:4860::8888"
+          enable_pipeline: true
+        - addr: "tls://dns.google"
+          dial_addr: "8.8.8.8"
+          enable_pipeline: true
+        # h3
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8844"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.4.4"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "2001:4860:4860::8888"
+          enable_http3: true
+        - addr: "https://dns.google/dns-query"
+          dial_addr: "8.8.8.8"
+          enable_http3: true
+
+  # cloudflare doh dot h3
+  - tag: cloudflare
+    type: forward
+    args:
+      concurrent: 3
+      upstreams:
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1001"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1111"
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "2606:4700:4700::1001"
+          enable_pipeline: true # TCP/DoT 启用 RFC 7766 新的 query pipelining 连接复用模式
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "1.0.0.1"
+          enable_pipeline: true
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "2606:4700:4700::1111"
+          enable_pipeline: true
+        - addr: "tls://1dot1dot1dot1.cloudflare-dns.com"
+          dial_addr: "1.0.0.1"
+          enable_pipeline: true
+
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1001"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.0.0.1"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "2606:4700:4700::1111"
+          enable_http3: true
+        - addr: "https://cloudflare-dns.com/dns-query"
+          dial_addr: "1.1.1.1"
+          enable_http3: true
+
+  - tag: forward_remote
+    type: forward
+    args:
+      concurrent: 1
+      upstreams:
+        - addr: tls://8.8.8.8
+          bootstrap: 119.29.29.29
+          enable_pipeline: false
+          max_conns: 2
+          insecure_skip_verify: false
+          idle_timeout: 30
+          enable_http3: false
+        - addr: tls://8.8.4.4
+          bootstrap: 119.29.29.29
+          enable_pipeline: false
+          max_conns: 2
+          insecure_skip_verify: false
+          idle_timeout: 30
+          enable_http3: false
+        - addr: tls://1.1.1.1
+          bootstrap: 119.29.29.29
+          enable_pipeline: false
+          max_conns: 2
+          insecure_skip_verify: false
+          idle_timeout: 30
+          enable_http3: false
+        - addr: tls://208.67.222.222
+          bootstrap: 119.29.29.29
+          enable_pipeline: false
+          max_conns: 2
+          insecure_skip_verify: false
+          idle_timeout: 30
+          enable_http3: false
+
+  # ali doh dot h3
+  - tag: ali
+    type: forward
+    args:
+      concurrent: 3
+      upstreams:
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200:baba::1"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.5.5.5"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200::1"
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.6.6.6"
+
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "2400:3200:baba::1"
+          enable_pipeline: true
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "223.5.5.5"
+          enable_pipeline: true
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "2400:3200::1"
+          enable_pipeline: true
+        - addr: "tls://dns.alidns.com"
+          dial_addr: "223.6.6.6"
+          enable_pipeline: true
+
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200:baba::1"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.5.5.5"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "2400:3200::1"
+          enable_http3: true
+        - addr: "https://dns.alidns.com/dns-query"
+          dial_addr: "223.6.6.6"
+          enable_http3: true
+
+  # dnspod doh dot
+  - tag: dnspod
+    type: forward
+    args:
+      concurrent: 3
+      upstreams:
+        - addr: "https://doh.pub/dns-query"
+          dial_addr: "1.12.12.12"
+        - addr: "https://doh.pub/dns-query"
+          dial_addr: "120.53.53.53"
+
+        - addr: "tls://dot.pub"
+          dial_addr: "1.12.12.12"
+          enable_pipeline: true
+        - addr: "tls://dot.pub"
+          dial_addr: "120.53.53.53"
+          enable_pipeline: true
+
+  # local dns
+  - tag: local
+    type: forward
+    args:
+      concurrent: 1
+      upstreams:
+        - addr: "udp://192.168.1.1:53"
+
+  # server 失败
+  - tag: reject_2
+    type: sequence
+    args:
+      - exec: reject 2
+
+  # 拒绝响应
+  - tag: reject_3
+    type: sequence
+    args:
+      - exec: reject 3
+
+  # 不支持的操作
+  - tag: reject_5
+    type: sequence
+    args:
+      - exec: reject 5

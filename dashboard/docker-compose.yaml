@@ -1,0 +1,100 @@
+version: '3'
+
+volumes:
+  logs:
+  prometheus_data:
+  grafana_data:
+  vector_data:
+
+networks:
+  loki:
+
+services:
+  mosdns:
+    container_name: mosdns
+    build:
+      context: ./mosdns/docker
+    image: mosdns:latest
+    volumes:
+      - ./mosdns/config:/etc/mosdns
+      - logs:/var/log
+    restart: always
+    network_mode: host
+    # ports:
+    #   - 5353:5353/udp
+    # networks:
+    #   - loki
+
+  vector:
+    container_name: vector
+    image: timberio/vector:latest-alpine
+    volumes:
+      - ./vector/config.yml:/etc/vector/vector.yaml
+      - logs:/var/log
+      - vector_data:/tmp/vector
+    restart: always
+    networks:
+      - loki
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus 
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - loki
+
+  loki:
+    image: grafana/loki:2.9.2
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+    # ports:
+    #   - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+
+  # promtail:
+  #   image: grafana/promtail:2.9.2
+  #   volumes:
+  #     - /var/log:/var/log
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - loki
+
+  grafana:
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy 
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - loki

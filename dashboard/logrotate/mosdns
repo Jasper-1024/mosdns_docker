@@ -1,0 +1,8 @@
+/var/log/mosdns.log {
+  daily
+  rotate 2
+  compress
+  missingok
+  notifempty
+  copytruncate
+}
