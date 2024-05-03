@@ -14,7 +14,7 @@ services:
     container_name: mosdns
     build:
       context: ./mosdns/docker
-    image: mosdns:latest
+    image: mosdns_unofficial:latest
     volumes:
       - ./mosdns/config:/etc/mosdns
       - logs:/var/log
