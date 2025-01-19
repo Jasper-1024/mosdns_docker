@@ -64,11 +64,11 @@ plugins:
       - exec: query_summary local
       - exec: $local
 
-  - tag: fallback_seq # 其他特殊情况统一使用 dns_cn 处理
+  - tag: fallback_seq # 其他特殊情况统一使用 dns_nocn 处理
     type: sequence
     args:
       - exec: query_summary fallback
-      - exec: $dns_cn
+      - exec: $dns_nocn
 
   - tag: other_seq # 其他特殊情况统一使用 dns_cn 处理
     type: sequence
